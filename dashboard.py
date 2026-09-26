@@ -18,10 +18,49 @@ from src.database import run_query
 st.set_page_config(page_title="Airline Analytics", page_icon="✈️", layout="wide")
 
 # Chart palette (validated categorical order; single hue for single-series charts)
-BLUE, ORANGE, AQUA = "#2a78d6", "#eb6834", "#1baf7a"
-CABIN_COLORS = {"Economy": BLUE, "Premium Economy": ORANGE, "Business": AQUA}
-INK, INK_2, MUTED, GRID, BASELINE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#c3c2b7"
+ACCENT, ORANGE, AQUA = "#c8f751", "#ff8a4c", "#35e0b3"
+CABIN_COLORS = {"Economy": ACCENT, "Premium Economy": ORANGE, "Business": AQUA}
+TEXT, SUBTEXT, MUTED, GRID, BASELINE = "#f4f5ef", "#c9cbc0", "#8b8d82", "#20231b", "#3a3d30"
+CARD_BG = "#14160f"
 DELAY_ORDER = ["On time (<15)", "15-29", "30-59", "60-119", "120-179", "180+", "Cancelled"]
+
+st.markdown("""
+<style>
+.stApp {
+    background:
+        radial-gradient(1100px 550px at 12% -8%, rgba(200,247,81,0.07), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(53,224,179,0.05), transparent 55%),
+        #0a0c08;
+}
+section[data-testid="stSidebar"] {
+    background-color: #101208;
+    border-right: 1px solid #20231b;
+}
+h1, h2, h3 { color: #f4f5ef !important; letter-spacing: -0.01em; }
+div[data-testid="stMetric"] {
+    background-color: #14160f;
+    border: 1px solid #20231b !important;
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: border-color 0.15s ease;
+}
+div[data-testid="stMetric"]:hover { border-color: rgba(200,247,81,0.35) !important; }
+div[data-testid="stMetricLabel"] { color: #8b8d82; }
+div[data-testid="stMetricValue"] { color: #f4f5ef; font-weight: 700; }
+div[data-testid="stPlotlyChart"] {
+    background-color: #14160f;
+    border: 1px solid #20231b;
+    border-radius: 14px;
+    padding: 10px 8px 4px 8px;
+}
+div[data-testid="stDataFrame"], div[data-testid="stExpander"] {
+    border: 1px solid #20231b;
+    border-radius: 12px;
+    overflow: hidden;
+}
+div[data-testid="stExpander"] { background-color: #10120b; }
+</style>
+""", unsafe_allow_html=True)
 
 
 # --------------------------------------------------------------------------
@@ -98,13 +137,13 @@ def fmt_money(n: float) -> str:
 
 def style(fig: go.Figure, title: str, height: int = 360, pct_axis: str | None = None) -> go.Figure:
     fig.update_layout(
-        title=dict(text=title, font=dict(size=15, color=INK), x=0, xanchor="left"),
+        title=dict(text=title, font=dict(size=15, color=TEXT), x=0, xanchor="left"),
         height=height,
         margin=dict(l=8, r=16, t=48, b=8),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="system-ui, -apple-system, 'Segoe UI', sans-serif", color=INK_2, size=12),
-        hoverlabel=dict(bgcolor="white", bordercolor=GRID, font=dict(color=INK)),
+        font=dict(family="system-ui, -apple-system, 'Segoe UI', sans-serif", color=SUBTEXT, size=12),
+        hoverlabel=dict(bgcolor=CARD_BG, bordercolor=BASELINE, font=dict(color=TEXT)),
         showlegend=False,
         bargap=0.3,
     )
@@ -119,11 +158,11 @@ def hbar(df: pd.DataFrame, x: str, y: str, title: str, fmt: str, hover: str, hei
          ref: float | None = None, ref_label: str = "") -> go.Figure:
     """Horizontal bar, largest at the top. `fmt` is a d3 format for the value labels."""
     fig = go.Figure(go.Bar(
-        x=df[x], y=df[y], orientation="h", marker=dict(color=BLUE, cornerradius=4),
-        texttemplate=f"%{{x:{fmt}}}", textposition="outside", textfont=dict(color=INK_2, size=11),
+        x=df[x], y=df[y], orientation="h", marker=dict(color=ACCENT, cornerradius=4),
+        texttemplate=f"%{{x:{fmt}}}", textposition="outside", textfont=dict(color=SUBTEXT, size=11),
         cliponaxis=False, customdata=df, hovertemplate=hover + "<extra></extra>",
     ))
-    fig.update_yaxes(autorange="reversed", showgrid=False, tickfont=dict(color=INK_2))
+    fig.update_yaxes(autorange="reversed", showgrid=False, tickfont=dict(color=SUBTEXT))
     if ref is not None:
         fig.add_vline(x=ref, line=dict(color=MUTED, dash="dot", width=1.5),
                       annotation=dict(text=ref_label, font=dict(color=MUTED, size=11), yanchor="bottom"),
@@ -183,7 +222,7 @@ def executive_overview() -> None:
     left, right = st.columns(2)
     with left:
         fig = go.Figure(go.Bar(
-            x=monthly["month_label"], y=monthly["flights"], marker=dict(color=BLUE, cornerradius=4),
+            x=monthly["month_label"], y=monthly["flights"], marker=dict(color=ACCENT, cornerradius=4),
             customdata=monthly[["on_time_rate", "cancellation_rate"]],
             hovertemplate="<b>%{x}</b><br>Flights: %{y:,}<br>On time: %{customdata[0]:.1%}"
                           "<br>Cancelled: %{customdata[1]:.1%}<extra></extra>",
@@ -208,7 +247,7 @@ def executive_overview() -> None:
     with right:
         fig = go.Figure(go.Scatter(
             x=monthly_pax["month_label"], y=monthly_pax["passengers"], mode="lines+markers",
-            line=dict(color=BLUE, width=2), marker=dict(size=8, color=BLUE, line=dict(color="white", width=2)),
+            line=dict(color=ACCENT, width=2), marker=dict(size=8, color=ACCENT, line=dict(color="white", width=2)),
             customdata=monthly_pax[["revenue"]],
             hovertemplate="<b>%{x}</b><br>Passengers: %{y:,}<br>Revenue: $%{customdata[0]:,.0f}<extra></extra>",
         ))
@@ -269,20 +308,20 @@ def operations() -> None:
         dist = flights["delay_category"].value_counts().reindex(DELAY_ORDER, fill_value=0)
         share = dist / dist.sum()
         fig = go.Figure(go.Bar(
-            x=dist.index, y=dist.values, marker=dict(color=BLUE, cornerradius=4), customdata=share.values,
-            texttemplate="%{customdata:.1%}", textposition="outside", textfont=dict(color=INK_2, size=11),
+            x=dist.index, y=dist.values, marker=dict(color=ACCENT, cornerradius=4), customdata=share.values,
+            texttemplate="%{customdata:.1%}", textposition="outside", textfont=dict(color=SUBTEXT, size=11),
             cliponaxis=False,
             hovertemplate="<b>%{x}</b><br>Flights: %{y:,}<br>Share: %{customdata:.1%}<extra></extra>",
         ))
         fig = style(fig, "Delay distribution (minutes late)", height=460)
-        fig.update_xaxes(tickfont=dict(color=INK_2))
+        fig.update_xaxes(tickfont=dict(color=SUBTEXT))
         st.plotly_chart(fig, width="stretch")
 
     left, right = st.columns(2)
     with left:
         hours = flight_metrics(flights, "departure_hour")
         fig = go.Figure(go.Bar(
-            x=hours["departure_hour"], y=hours["flights"], marker=dict(color=BLUE, cornerradius=4),
+            x=hours["departure_hour"], y=hours["flights"], marker=dict(color=ACCENT, cornerradius=4),
             customdata=hours[["avg_delay_minutes", "on_time_rate"]],
             hovertemplate="<b>%{x}:00</b><br>Flights: %{y:,}<br>Avg delay: %{customdata[0]:.1f} min"
                           "<br>On time: %{customdata[1]:.1%}<extra></extra>",
@@ -293,7 +332,7 @@ def operations() -> None:
     with right:
         fig = go.Figure(go.Scatter(
             x=hours["departure_hour"], y=hours["avg_delay_minutes"], mode="lines+markers",
-            line=dict(color=BLUE, width=2), marker=dict(size=8, color=BLUE, line=dict(color="white", width=2)),
+            line=dict(color=ACCENT, width=2), marker=dict(size=8, color=ACCENT, line=dict(color="white", width=2)),
             customdata=hours[["on_time_rate", "flights"]],
             hovertemplate="<b>%{x}:00</b><br>Avg delay: %{y:.1f} min<br>On time: %{customdata[0]:.1%}"
                           "<br>Flights: %{customdata[1]:,}<extra></extra>",
@@ -320,7 +359,7 @@ def demand_vs_punctuality(network_on_time: float) -> None:
         d = routes[routes["flag"] == flagged]
         fig.add_trace(go.Scatter(
             x=d["passengers"], y=d["on_time_rate"], mode="markers+text" if flagged else "markers", name=name,
-            text=d["route"] if flagged else None, textposition="top center", textfont=dict(color=INK_2, size=11),
+            text=d["route"] if flagged else None, textposition="top center", textfont=dict(color=SUBTEXT, size=11),
             marker=dict(size=11, color=color, line=dict(color="white", width=2)),
             customdata=d[["route", "flights", "avg_delay_minutes"]],
             hovertemplate="<b>%{customdata[0]}</b><br>Passengers: %{x:,}<br>On time: %{y:.1%}"
@@ -392,13 +431,13 @@ def passenger_revenue() -> None:
         fig = go.Figure(go.Bar(
             x=cabin.index, y=cabin["revenue"], marker=dict(color=[CABIN_COLORS[c] for c in cabin.index], cornerradius=4),
             customdata=cabin[["passengers", "avg_ticket_price"]], texttemplate="%{y:$.3s}", textposition="outside",
-            textfont=dict(color=INK_2), cliponaxis=False,
+            textfont=dict(color=SUBTEXT), cliponaxis=False,
             hovertemplate="<b>%{x}</b><br>Revenue: $%{y:,.0f}<br>Passengers: %{customdata[0]:,}"
                           "<br>Avg fare: $%{customdata[1]:,.0f}<extra></extra>",
         ))
         fig = style(fig, "Revenue by cabin class")
         fig.update_yaxes(tickformat="$~s")
-        fig.update_xaxes(tickfont=dict(color=INK_2))
+        fig.update_xaxes(tickfont=dict(color=SUBTEXT))
         st.plotly_chart(fig, width="stretch")
     with right:
         fares = booking_metrics(bookings, ["airline", "cabin_class"])
@@ -414,7 +453,7 @@ def passenger_revenue() -> None:
         fig.update_layout(showlegend=True, barmode="group", bargap=0.25, bargroupgap=0.05,
                           legend=dict(orientation="h", y=1.1, x=1, xanchor="right"))
         fig.update_yaxes(tickprefix="$")
-        fig.update_xaxes(tickfont=dict(color=INK_2))
+        fig.update_xaxes(tickfont=dict(color=SUBTEXT))
         st.plotly_chart(fig, width="stretch")
 
     monthly = booking_metrics(bookings, ["month", "month_label", "cabin_class"]).sort_values("month")
