@@ -10,6 +10,10 @@ raw CSV → Python cleaning → SQLite → SQL analysis → KPIs → Excel repor
 
 ## Dashboard
 
+The dashboard uses a dark theme (near-black background, lime/teal/orange accents, card-style KPIs and charts).
+
+> **Note:** the screenshots below are from the previous light theme and need to be retaken against the current dark UI.
+
 **Executive Overview:** headline KPIs, monthly volume, on-time rate by airline, delay by airport, passenger trend
 
 ![Executive Overview](docs/screenshots/executive_overview.png)
@@ -33,7 +37,7 @@ Every page responds to the sidebar filters (airline, origin, destination, month 
 - **Reconciliation:** headline KPIs are computed in both pandas and SQL, and the pipeline asserts they match
 - **Airline, route, airport, passenger and revenue analysis**, including the question "which busy routes run late?"
 - **Automated Excel reporting:** a six-sheet formatted workbook with native Excel charts and conditional formatting
-- **Interactive dashboard:** Streamlit + Plotly, three pages, cross-filtering
+- **Interactive dashboard:** Streamlit + Plotly, three pages, cross-filtering, dark theme with card-style KPIs and charts
 
 ## Tech Stack
 
