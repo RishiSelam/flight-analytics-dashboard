@@ -12,8 +12,6 @@ raw CSV → Python cleaning → SQLite → SQL analysis → KPIs → Excel repor
 
 The dashboard uses a dark theme (near-black background, lime/teal/orange accents, card-style KPIs and charts).
 
-> **Note:** the screenshots below are from the previous light theme and need to be retaken against the current dark UI.
-
 **Executive Overview:** headline KPIs, monthly volume, on-time rate by airline, delay by airport, passenger trend
 
 ![Executive Overview](docs/screenshots/executive_overview.png)

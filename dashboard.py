@@ -46,7 +46,13 @@ div[data-testid="stMetric"] {
 }
 div[data-testid="stMetric"]:hover { border-color: rgba(200,247,81,0.35) !important; }
 div[data-testid="stMetricLabel"] { color: #8b8d82; }
-div[data-testid="stMetricValue"] { color: #f4f5ef; font-weight: 700; }
+div[data-testid="stMetricValue"] {
+    color: #f4f5ef;
+    font-weight: 700;
+    font-size: 1.65rem;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
 div[data-testid="stPlotlyChart"] {
     background-color: #14160f;
     border: 1px solid #20231b;
